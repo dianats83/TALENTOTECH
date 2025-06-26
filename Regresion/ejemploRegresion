@@ -1,1 +1,19 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
+df = pd.read_excel("/content/Datos propiedades de los estimadores.xlsx") #Esta linea carga los datos
+df.head() #Esta linea muestra las primeras 5 lineas del archivo
+
+b1, b0 = np.polyfit(df["x"], df["y"], 1)
+print(b1, b0) 
+
+plt.scatter(df["x"], df["y"], c="pink")
+plt.plot(df["x"], b0+b1*df["x"])
+plt.plot(df["x"].mean(), df["y"].mean(), c="red", marker="*") 
+#plt.title("Gráfica de dispersión Resistencia Vs Fibra")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.grid()
+#plt.savefig("Grafica_dispersion_fibra")
+plt.show()
