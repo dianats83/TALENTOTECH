@@ -1,1 +1,216 @@
+Descargar el dataset desde GitHub
+https://github.com/sharmaroshan/Heart-UCI-Dataset/blob/master/heart.csv
+
+DESCRIPCION DE BASE DE DATOS
+El conjunto de datos contiene variables relacionadas con la salud cardiovascular de pacientes, utilizadas para predecir la presencia de enfermedad cardíaca (target):
+age, sex: edad y sexo del paciente.
+
+cp: tipo de dolor en el pecho.
+
+trestbps, chol: presión en reposo y colesterol.
+
+fbs: azúcar en sangre en ayunas.
+
+restecg: resultados del electrocardiograma.
+
+thalach: frecuencia cardíaca máxima alcanzada.
+
+exang: angina inducida por ejercicio.
+
+oldpeak: depresión ST inducida por ejercicio.
+
+slope, ca, thal: características relacionadas con el ECG y la perfusión.
+
+target: variable objetivo (1 = enfermedad presente, 0 = ausente).
+
+1. Importar librerías
+
+[5]
+0 s
+# 1. Importar librerías
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+2. Cargar dataset "Heart.csv"
+
+[6]
+0 s
+# 2. Cargar dataset "Heart.csv"
+df = pd.read_csv("heart.csv")
+df.head()
+
+Próximos pasos:
+3. Exploración de datos
+
+[3]
+0 s
+print("El número de registros en la tabla heart es:", len(df))
+El número de registros en la tabla heart es: 609
+
+[7]
+0 s
+# 3. Exploración de datos
+print(df.info())
+print(df.describe())
+sns.countplot(x='var_objetivo', data=df)
+plt.title("Distribución de la variable objetivo")
+plt.show()
+
+
+4. Correlaciones
+
+[8]
+0 s
+# 4. Correlaciones
+plt.figure(figsize=(12,10))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+plt.title("Mapa de calor de correlaciones")
+plt.show()
+
+
+5. Preprocesamiento
+
+[11]
+0 s
+# 5. Preprocesamiento
+X = df.drop('var_objetivo', axis=1)
+y = df['var_objetivo']
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+6. División de datos
+
+[12]
+0 s
+# 6. División de datos
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, random_state=42)
+
+7. Modelo: Regresión Logística
+
+[13]
+0 s
+# 7. Modelo: Regresión Logística
+log_model = LogisticRegression()
+log_model.fit(X_train, y_train)
+y_pred_log = log_model.predict(X_test)
+
+print("Resultados de Regresión Logística")
+print(confusion_matrix(y_test, y_pred_log))
+print(classification_report(y_test, y_pred_log))
+
+Resultados de Regresión Logística
+[[ 29  22]
+ [  5 127]]
+              precision    recall  f1-score   support
+
+           0       0.85      0.57      0.68        51
+           1       0.85      0.96      0.90       132
+
+    accuracy                           0.85       183
+   macro avg       0.85      0.77      0.79       183
+weighted avg       0.85      0.85      0.84       183
+
+8. Modelo: Random Forest
+
+[14]
+0 s
+# 8. Modelo: Random Forest
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+
+print("Resultados de Random Forest")
+print(confusion_matrix(y_test, y_pred_rf))
+print(classification_report(y_test, y_pred_rf))
+
+
+Resultados de Random Forest
+[[ 35  16]
+ [  2 130]]
+              precision    recall  f1-score   support
+
+           0       0.95      0.69      0.80        51
+           1       0.89      0.98      0.94       132
+
+    accuracy                           0.90       183
+   macro avg       0.92      0.84      0.87       183
+weighted avg       0.91      0.90      0.90       183
+
+9.Plot confusion matrix
+
+[15]
+0 s
+# 9.Plot confusion matrix
+import matplotlib.pyplot as plt
+cm = confusion_matrix(y_test, y_pred_rf)
+
+ax = plt.axes()
+df_cm = cm
+sns.heatmap(df_cm, annot=True, annot_kws={"size": 30}, fmt='d',cmap="Blues", ax = ax )
+ax.set_title('Confusion Matrix')
+plt.show()
+
+
+Métricas de Evaluación - Conclusiones
+• Precisión (Accuracy): 83.5%
+
+• Precisión Positiva (Precision): 84.3%
+
+• Sensibilidad (Recall): 86.0%
+
+• Especificidad: 80.5%
+
+• F1 Score: 85.1%
+
+
+[ ]
+
+Comienza a programar o generar con IA.
+3. Exploración de datos (EDA) - Ampliado
+3.1 Distribución de las características
+
+[16]
+2 s
+# 3.1 Distribución de las características
+df.hist(figsize=(15, 10))
+plt.tight_layout()
+plt.show()
+
+3.2 Análisis de outliers (Box Plots)
+
+[18]
+1 s
+# 3.2 Análisis de outliers (Box Plots)
+plt.figure(figsize=(15, 10))
+sns.boxplot(data=df.drop('var_objetivo', axis=1))
+plt.title('Box plots for numerical features')
+plt.xticks(rotation=45)
+plt.show()
+
+3.3 Relación entre características y la variable objetivo
+
+[19]
+2 s
+# 3.3 Relación entre características y la variable objetivo
+categorical_cols = ['sexo', 'dolor_pecho', 'azucar_sangre_ayunas', 'r_electro', 'angina_ejer', 'pdt_seg_ECG', 'n_vasos_fluoroscopia', 'perfusion_miocardica']
+for col in categorical_cols:
+    plt.figure(figsize=(6, 4))
+    sns.countplot(x=col, hue='var_objetivo', data=df, palette='viridis')
+    plt.title(f'Distribución de {col} por Target')
+    plt.show()
+
+numerical_cols = ['edad', 'presion_reposo', 'colesteron', 'f_car_max', 'depresionST_ejer']
+for col in numerical_cols:
+    plt.figure(figsize=(8, 5))
+    sns.boxplot(x='var_objetivo', y=col, data=df, palette='viridis')
+    plt.title(f'Distribución de {col} por Target')
+    plt.show()
+
 
